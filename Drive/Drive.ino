@@ -1,0 +1,336 @@
+/* drive.ino
+ *
+ * Eric Ayars
+ * 9/28/24
+ *
+ * firmware for servo-based sinusoidal drive
+ * 
+ * The masterClock is the 256-event sin-drive counter. 
+ * See https://www.pjrc.com/teensy/td_timing_IntervalTimer.html for details on this library.
+ *
+ * The servo is controlled using PWMServo.
+ * See https://www.pjrc.com/teensy/td_libs_Servo.html
+ *
+ * V0.9 stealing basics of my duffing-drive firmware, trimming it down to do this job.
+ * V1.0 Everything seems to work...
+ *
+ */
+
+/****************************************
+ * Libraries
+ ****************************************/
+
+#include "Arduino.h"
+#include <EEPROM.h>
+#include <math.h>
+#include "PWMServo.h"
+#include "Vrekrer_scpi_parser.h"
+
+
+/****************************************
+ * Constants
+ ****************************************/
+
+// Identification, firmware version
+const char* deviceID = "Sine-Drive V1.0, Chico State PID Lab";
+
+// EEPROM Addresses
+const uint8_t AMPLITUDE_ADDRESS = 0x10;
+const uint8_t FREQUENCY_ADDRESS = AMPLITUDE_ADDRESS + sizeof(float);
+
+// Geometry
+const double R = 2.6; 			// cm
+const double L = 7.5;			// cm
+const double lo=sqrt(R*R+L*L);	// hypoteneuse at center of servo travel
+const double Amax = R+L-lo;		// Can't do more than servo arm will allow...
+
+// Microcontroller Pins
+const uint8_t SERVO_PIN = 11;	// attachment pin for servo
+
+// Hardware
+PWMServo driver;				// create servo object
+IntervalTimer masterClock;		// create master interrupt clock
+SCPI_Parser Comms;
+
+/****************************************
+ * Variables
+ ****************************************/
+
+// Servo and timing controll
+volatile uint8_t phase = 0; // phase as a byte.
+volatile uint8_t tickFlag=0;// do we update servo position?
+uint8_t phaseConvert[256];	// look-up table for phase conversion to eliminate cosine error.
+uint16_t servoPosition=90;	// Where is the servo now?
+double amplitude;			// string (not servo) amplitude. In units of cm, max value Amax.
+double frequency;			// driver frequency, units of Hz.
+int16_t dt;					// time interval, microseconds
+
+// Booleans
+uint8_t driving = 0;		// Whether servo is going (1) or not (0).
+
+/****************************************
+ * SCPI overhead functions
+ ****************************************/
+
+void Identify(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	// response to "*IDN?"
+	interface.println(deviceID);
+	interface.print("Max amplitude ");
+	interface.println(Amax);
+}
+
+void ReportLastError(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	// response to error query
+	switch(Comms.last_error){
+		case Comms.ErrorCode::BufferOverflow: 
+			interface.println(F("Buffer overflow error"));
+			break;
+		case Comms.ErrorCode::Timeout:
+			interface.println(F("Communication timeout error"));
+			break;
+		case Comms.ErrorCode::UnknownCommand:
+			interface.println(F("Unknown command received"));
+			break;
+		//case Comms.ErrorCode::InvalidParameter:
+		//	interface.println(F("Invalid parameter received"));
+		case Comms.ErrorCode::NoError:
+			interface.println(F("No Error"));
+			break;
+	}
+	Comms.last_error = Comms.ErrorCode::NoError;
+}
+
+void errorHandler(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	//This function is called every time an error occurs
+
+	/* The error type is stored in Comms.last_error
+		Possible errors are:
+		SCPI_Parser::ErrorCode::NoError
+SCPI_Parser::ErrorCode::UnknownCommand
+		SCPI_Parser::ErrorCode::Timeout
+		SCPI_Parser::ErrorCode::BufferOverflow
+	*/
+	ReportLastError(commands, parameters, interface);
+
+	/* For BufferOverflow errors, the rest of the message, still in the interface
+	buffer or not yet received, will be processed later and probably 
+	trigger another kind of error.
+	Here we flush the incomming message*/
+	if (Comms.last_error == SCPI_Parser::ErrorCode::BufferOverflow) {
+		delay(2);
+		while (interface.available()) {
+			delay(2);
+			interface.read();
+		}
+
+	/*
+	For UnknownCommand errors, you can get the received unknown command and
+	parameters from the commands and parameters variables.
+	*/
+	}
+}
+
+void tellJoke(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	// "Useful" routine for testing communications. I don't know the punchline.
+	interface.println("How many 202A students does it take to change a light bulb?");
+}
+
+/****************************************
+ * Oscillator functions
+ ****************************************/
+
+void buildWave(double A) {
+	/*	Fills the array with actual angles so that the cosine-errored string moves sinusoidally.
+		See calculations in "angle correction work.pdf", 5/2/24. (Eric Ayars lab notebooks)
+		Call this each time A changes. (Frequency changes are handled by how fast the program
+		cycles through these values.)
+		
+		Note: the time necessary for the Teensy 4.0 to completely recalculate this conversion
+		array is under 240 microseconds. 
+	*/
+
+	//intermediate calculation values, done once for speed.
+	double phi;
+	double omegaT;
+	double convert = 2*M_PI/256.0;
+	double A2RL = A*A/(2*R*L);
+	double loA = 2*lo/A;
+
+	for (int j=0;j<256;j++) {
+		omegaT = j*convert;
+		double sOt = sin(omegaT);	// Rather than calculate sin(omegaT) three times per loop.
+		phi = (asin(A2RL*(loA*sOt + sOt*sOt)) + M_PI/2.0)*180.0/M_PI;
+		phaseConvert[j] = (uint8_t)(phi);
+	}
+}
+
+void help(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	// helpful information
+	interface.println("SCPI commands:");
+	interface.println("*IDN? - identify device and provide firmware version.");
+	interface.println("AMPLitude {?|f} - query amplitude, or set to floating point value f. \nValue is constrained to Amax.");
+	interface.println("FREQuency {?|f} - query frequency, or set to floating point value f. \nNo limit on f, other than reality.");
+	interface.println("DRIVe {?|b} - query servo drive state, or set to boolean b.");
+	interface.println("MOVE {?|i} - query servo position, or set to integer degree value i. (0<=i<180)");
+	interface.println("CENTer - move servo to center of range. Equivalent to 'MOVE 90'.");
+	interface.println("HELP - prints this information, but you know that already.");
+	interface.println("Note that frequency and amplitude are saved in EEPROM and survive power cycling. If you need to change these values more than 10,000 times modify this firmware so that EEPROM doesn't wear out. See Eric Ayars, he can help.");
+}
+	
+void setAmplitude(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	// sets amplitude. Constrains value to Amax.
+	if (parameters.Size() > 0) {
+		amplitude = String(parameters[0]).toFloat();
+		if (amplitude > Amax) {
+			amplitude = Amax;
+		}
+		buildWave(amplitude);
+		EEPROM.put(AMPLITUDE_ADDRESS, amplitude);
+	}
+}
+
+void getAmplitude(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	// let user know what the amplitude is.
+	interface.println(amplitude, 6);
+}
+
+void setFrequency(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	// sets drive frequency. No attempt is made to constrain this frequency to sane values.
+	if (parameters.Size() > 0) {
+		frequency = String(parameters[0]).toFloat();
+		EEPROM.put(FREQUENCY_ADDRESS, frequency);
+		if (driving) {
+			// Drive is currently on, so change frequency.
+			dt = (int16_t)(1000000.0/(256.0*frequency));
+			masterClock.update(dt);
+		}
+	}
+}
+
+void getFrequency(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+	// lets user know what the frequency is.
+	interface.println(frequency, 6);
+}
+
+void setDrive(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// turns servo on or off.
+	if (parameters.Size() > 0) {
+		uint16_t whatDrive = String(parameters[0]).toInt();
+		if (whatDrive > 0) {
+			driving = 1;
+			// stepTime is in microseconds
+			dt = (int16_t)(1000000.0/(256.0*frequency));
+			// start master clock.
+			masterClock.begin(clockTick, dt); 
+		} else {
+			driving = 0;
+			masterClock.end();
+		}
+	}
+}
+
+void getDrive(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// Lets user know servo drive state, in case they're blind and deaf.
+	interface.println(driving);
+}
+
+void centerServo(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// moves servo to center of range.
+	if (driving) {
+		driving = 0;
+		masterClock.end();
+	}
+	driver.write(90);		
+}
+
+void moveServo(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// Moves servo to a requested position
+	if (parameters.Size() > 0) {
+		servoPosition = String(parameters[0]).toInt();
+		driver.write(servoPosition);
+	}
+}
+
+void whereServo(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// tells user where the servo is.
+	interface.println(servoPosition);
+}
+
+/****************************************
+ * Interrupt(s)
+ ****************************************/
+
+void clockTick() {
+	// ISR for master clock. Updates tickFlag and phase
+	tickFlag = 1;
+	phase++;
+}
+
+/****************************************
+ * Setup
+ ****************************************/
+
+void setup() {
+
+	delay(100); // helps EEPROM work better?
+
+	// get current amplitude and frequency settings from EEPROM
+	EEPROM.get(AMPLITUDE_ADDRESS, amplitude);
+	EEPROM.get(FREQUENCY_ADDRESS, frequency);
+
+	// Calculate look-up table for sine wave
+	buildWave(amplitude);
+
+	// Calculate dt
+	dt = (int16_t)(1000000.0/(256.0*frequency));
+
+	// start servo at center. 
+	driver.attach(SERVO_PIN);
+	driver.write(servoPosition);
+
+	// configure SCPI commands
+	Comms.RegisterCommand(F("*IDN?"), &Identify);
+	Comms.RegisterCommand(F("JOKE"), &tellJoke);
+	Comms.RegisterCommand(F("AMPLitude"), &setAmplitude);
+	Comms.RegisterCommand(F("AMPLitude?"), &getAmplitude);
+	Comms.RegisterCommand(F("FREQuency"), &setFrequency);
+	Comms.RegisterCommand(F("FREQuency?"), &getFrequency);
+	Comms.RegisterCommand(F("DRIVe"), &setDrive);
+	Comms.RegisterCommand(F("DRIVe?"), &getDrive);
+	Comms.RegisterCommand(F("CENTer"), &centerServo);
+	Comms.RegisterCommand(F("MOVE"), &moveServo);
+	Comms.RegisterCommand(F("MOVE?"), &whereServo);
+	Comms.RegisterCommand(F("HELP"), &help);
+
+	Comms.SetErrorHandler(&errorHandler);
+
+	// start serial communications
+	Serial.begin(9600);			// actual speed is set by USB bus, 9600 is vestigial.
+	while (!Serial) delay(10);	// wait for Serial to start.
+	
+}
+
+
+/****************************************
+ * Loop
+ ****************************************/
+
+void loop() {
+	
+	// Wait around until something happens. When it happens, do something.
+	
+	// Here's one thing that could happen: serial input. Send that to SCPI parser.
+	Comms.ProcessInput(Serial, "\n");
+
+	// Here's another thing that could happen: if driver is true, then every dt
+	// there will be an interrupt, which sets tickFlag indicating it's time to
+	// update the servo position
+
+	if (tickFlag) {			// Next step!
+		tickFlag = 0;		// clear the flag
+		
+		// update servo position using look-up table			
+		servoPosition = phaseConvert[phase];
+		driver.write(servoPosition);	
+	}
+}
