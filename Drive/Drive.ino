@@ -13,6 +13,8 @@
  *
  * V0.9 stealing basics of my duffing-drive firmware, trimming it down to do this job.
  * V1.0 Everything seems to work...
+ * V1.1 Added SERVO_DIRECTION code, to be set once per hardware depending on servo orientation.
+ * V1.2 Made all parameters EEPROM-configurable, added appropriate commands, added dump() for debug.
  *
  */
 
@@ -32,17 +34,22 @@
  ****************************************/
 
 // Identification, firmware version
-const char* deviceID = "Sine-Drive V1.0, Chico State PID Lab";
+const char* deviceID = "Sine-Drive V1.2, Chico State PID Lab";
 
 // EEPROM Addresses
-const uint8_t AMPLITUDE_ADDRESS = 0x10;
+const uint8_t SAVE_ADDRESS = 0x00;	// whether to save values of f and A in EEPROM. Default 0.
+const uint8_t DIRECTION_ADDRESS = SAVE_ADDRESS + sizeof(uint8_t);
+const uint8_t L_ADDRESS = DIRECTION_ADDRESS + sizeof(uint8_t);
+const uint8_t R_ADDRESS = L_ADDRESS + sizeof(float);
+const uint8_t AMPLITUDE_ADDRESS = R_ADDRESS + sizeof(float);
 const uint8_t FREQUENCY_ADDRESS = AMPLITUDE_ADDRESS + sizeof(float);
 
 // Geometry
-const double R = 2.6; 			// cm
-const double L = 7.5;			// cm
-const double lo=sqrt(R*R+L*L);	// hypoteneuse at center of servo travel
-const double Amax = R+L-lo;		// Can't do more than servo arm will allow...
+double R; 						// cm, load from EEPROM
+double L;						// cm, load from EEPROM
+double lo;						// hypoteneuse at center of servo travel
+double Amax;					// Can't do more than servo arm will allow...
+uint8_t direction;				// Sets servo polarity.
 
 // Microcontroller Pins
 const uint8_t SERVO_PIN = 11;	// attachment pin for servo
@@ -51,6 +58,7 @@ const uint8_t SERVO_PIN = 11;	// attachment pin for servo
 PWMServo driver;				// create servo object
 IntervalTimer masterClock;		// create master interrupt clock
 SCPI_Parser Comms;
+uint8_t writeEEPROM;			// whether to save (1) or not (0) F, A.
 
 /****************************************
  * Variables
@@ -67,6 +75,7 @@ int16_t dt;					// time interval, microseconds
 
 // Booleans
 uint8_t driving = 0;		// Whether servo is going (1) or not (0).
+uint8_t save = 1;      	    // whether to save f and A values in eeprom.
 
 /****************************************
  * SCPI overhead functions
@@ -173,8 +182,14 @@ void help(SCPI_C commands, SCPI_P parameters, Stream& interface) {
 	interface.println("DRIVe {?|b} - query servo drive state, or set to boolean b.");
 	interface.println("MOVE {?|i} - query servo position, or set to integer degree value i. (0<=i<180)");
 	interface.println("CENTer - move servo to center of range. Equivalent to 'MOVE 90'.");
+	interface.println("EEPRom {?|b} - query whether A & f are saved in EEPROM, or set that state to 'b'.");
+	interface.println("LENGth {?|f} - query value of L, or set to f");
+	interface.println("RADIus {?|f} - query value of R, or set to f");
+	interface.println("DIREction {?|b} - query servo polarity, or set to b");
+	interface.println("DUMP - dumps look-up table for debugging analysis.");
 	interface.println("HELP - prints this information, but you know that already.");
-	interface.println("Note that frequency and amplitude are saved in EEPROM and survive power cycling. If you need to change these values more than 10,000 times modify this firmware so that EEPROM doesn't wear out. See Eric Ayars, he can help.");
+	interface.println("Note that frequency and amplitude are saved in EEPROM to survive power cycling. (Along with other parameters!)  If you need to change these values more than 10,000 times, turn EEPROM off with 'EEPRom 0'.");
+
 }
 	
 void setAmplitude(SCPI_C commands, SCPI_P parameters, Stream& interface) {
@@ -185,7 +200,9 @@ void setAmplitude(SCPI_C commands, SCPI_P parameters, Stream& interface) {
 			amplitude = Amax;
 		}
 		buildWave(amplitude);
-		EEPROM.put(AMPLITUDE_ADDRESS, amplitude);
+		if (writeEEPROM) {
+			EEPROM.put(AMPLITUDE_ADDRESS, amplitude);
+		}
 	}
 }
 
@@ -198,7 +215,9 @@ void setFrequency(SCPI_C commands, SCPI_P parameters, Stream& interface) {
 	// sets drive frequency. No attempt is made to constrain this frequency to sane values.
 	if (parameters.Size() > 0) {
 		frequency = String(parameters[0]).toFloat();
-		EEPROM.put(FREQUENCY_ADDRESS, frequency);
+		if (writeEEPROM) {
+			EEPROM.put(FREQUENCY_ADDRESS, frequency);
+		}
 		if (driving) {
 			// Drive is currently on, so change frequency.
 			dt = (int16_t)(1000000.0/(256.0*frequency));
@@ -256,6 +275,73 @@ void whereServo(SCPI_Commands, SCPI_P parameters, Stream& interface) {
 	interface.println(servoPosition);
 }
 
+void dumpLUT(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// dumps LUT to interface for debugging. Why isn't the output sinusoidal?
+	for (uint16_t j = 0;j<256;j++) {
+		interface.println(phaseConvert[j]);
+	}
+}
+
+void EEPROM_state(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// tells user whether EEPROM is being used to save A and f or not.
+	interface.println(writeEEPROM);
+}
+
+void setEEPROM(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// sets (and saves) whether EEPROM is being used to save A and f.
+	if (parameters.Size() > 0) {
+		writeEEPROM = String(parameters[0]).toInt();
+		EEPROM.put(SAVE_ADDRESS, writeEEPROM);
+	}
+}
+
+void getDirection(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// tells user whether EEPROM is being used to save A and f or not.
+	interface.println(direction);
+}
+
+void setDirection(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// sets (and saves) whether EEPROM is being used to save A and f.
+	if (parameters.Size() > 0) {
+		direction = String(parameters[0]).toInt();
+		EEPROM.put(DIRECTION_ADDRESS, direction);
+	}
+}
+
+void getRadius(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// returns current value of R
+	interface.println(R);
+}
+
+void getLength(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// returns current value of L
+	interface.println(L);
+}
+
+void setRadius(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// changes value of R, saves that value in EEPROM.
+	if (parameters.Size() > 0) {
+		R = String(parameters[0]).toFloat();
+		// calculate new limits
+		lo=sqrt(R*R+L*L);
+		Amax = R+L-lo;
+		// save value in EEPROM
+		EEPROM.put(R_ADDRESS, R);
+	}
+}
+
+void setLength(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// changes value of L, saves that value in EEPROM.
+	if (parameters.Size() > 0) {
+		L = String(parameters[0]).toFloat();
+		// calculate new limits
+		lo=sqrt(R*R+L*L);
+		Amax = R+L-lo;
+		// save value in EEPROM
+		EEPROM.put(L_ADDRESS, L);
+	}
+}
+
 /****************************************
  * Interrupt(s)
  ****************************************/
@@ -272,11 +358,23 @@ void clockTick() {
 
 void setup() {
 
-	delay(100); // helps EEPROM work better?
+	delay(100); // helps EEPROM work better? Not sure.
+
+	// Get geometry from EEPROM, calculate limit to A.
+	EEPROM.get(L_ADDRESS, L);
+	EEPROM.get(R_ADDRESS, R);
+	lo=sqrt(R*R+L*L);
+	Amax = R+L-lo;
 
 	// get current amplitude and frequency settings from EEPROM
 	EEPROM.get(AMPLITUDE_ADDRESS, amplitude);
 	EEPROM.get(FREQUENCY_ADDRESS, frequency);
+	
+	// get whether or not to save to EEPROM from EEPROM.
+	EEPROM.get(SAVE_ADDRESS, save);
+
+	// get servo polarity from EEPROM
+	EEPROM.get(DIRECTION_ADDRESS, direction);
 
 	// Calculate look-up table for sine wave
 	buildWave(amplitude);
@@ -301,6 +399,15 @@ void setup() {
 	Comms.RegisterCommand(F("MOVE"), &moveServo);
 	Comms.RegisterCommand(F("MOVE?"), &whereServo);
 	Comms.RegisterCommand(F("HELP"), &help);
+	Comms.RegisterCommand(F("EEPRom?"), &EEPROM_state);
+	Comms.RegisterCommand(F("EEPRom"), &setEEPROM);
+	Comms.RegisterCommand(F("RADIus?"), &getRadius);
+	Comms.RegisterCommand(F("RADIus"), &setRadius);
+	Comms.RegisterCommand(F("LENGth?"), &getLength);
+	Comms.RegisterCommand(F("LENGth"), &setLength);
+	Comms.RegisterCommand(F("DUMP"), &dumpLUT);
+	Comms.RegisterCommand(F("DIREction?"), &getDirection);
+	Comms.RegisterCommand(F("DIREction"), &setDirection);
 
 	Comms.SetErrorHandler(&errorHandler);
 
@@ -331,6 +438,10 @@ void loop() {
 		
 		// update servo position using look-up table			
 		servoPosition = phaseConvert[phase];
-		driver.write(servoPosition);	
+		if (direction) {
+			driver.write(179-servoPosition);	
+		} else {
+			driver.write(servoPosition);	
+		}
 	}
 }
