@@ -30,8 +30,8 @@ bool DEBUG = 0;
  ****************************************/
 
 #define SCPI_ARRAY_SYZE 3
-#define SCPI_MAX_TOKENS 16
-#define SCPI_MAX_COMMANDS 23
+#define SCPI_MAX_TOKENS 17
+#define SCPI_MAX_COMMANDS 24
 
 /****************************************
  * Libraries
@@ -183,6 +183,24 @@ void buildWave(double A) {
 	if (DEBUG) Serial.println("buildWave() complete");
 }
 
+void buildWaveDumb(double A) {
+	/* 
+	   Don't use this. It's here purely to generate bad data for my talk about this apparatus.
+
+	   Fills the array with sinusoidal angles, so that the output reverts to the cosine-error
+	   oscillation.
+	*/
+
+	double phi;
+	double convert = 2*M_PI/256.0;
+
+	for (int j=0;j<256;j++) {
+		phi = sin(j*convert);
+		phaseConvert[j] = (uint8_t)(phi);
+	}
+	if (DEBUG) Serial.println("buildWaveDumb() complete");
+}
+
 void help(SCPI_C commands, SCPI_P parameters, Stream& interface) {
 	// helpful information
 	interface.println("SCPI commands:");
@@ -199,7 +217,7 @@ void help(SCPI_C commands, SCPI_P parameters, Stream& interface) {
 	interface.println("TUNE:DEBUg {b} - Turns on debug (verbose) mode");
 	interface.println("TUNE:DUMP - Dumps LUT for analysis");
 	interface.println("TUNE:DEEProm - Dumps EEPROM values for analysis");
-
+	interface.println("TUNE:DUMB - Rebuilds phaseConvert() array to move the servo sinusoidally instead of corrected. Don't use this, it's here only to provide data for my talk on this apparatus.");
 	interface.println("HELP - prints this information, but you know that already.");
 	interface.println("Note that frequency and amplitude are saved in EEPROM to survive power cycling. (Along with other parameters!)  If you need to change these values more than 100,000 times, turn EEPROM off with 'TUNE:EEPRom 0'.");
 
