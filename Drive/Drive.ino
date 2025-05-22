@@ -16,6 +16,7 @@
  * V1.1 Added SERVO_DIRECTION code, to be set once per hardware depending on servo orientation.
  * V1.2 Made all parameters EEPROM-configurable, added appropriate commands, added dump() for debug. Nothing works now.
  * V1.3 Added debug mode, got things working again. Subtle error involving geometric parameters set to zero so Amax was zero so amplitude couldn't be set to greater than zero... Anyway, it works now. 
+ * V1.4 Added 'dumb' mode, which recalculates servo motion to just be sinusoidal and damn the harmonics. Dumb mode is not saved and is lost any time A is adjusted.
  *
  */
 
@@ -48,7 +49,7 @@ bool DEBUG = 0;
  ****************************************/
 
 // Identification, firmware version
-const char* deviceID = "Sine-Drive V1.3, Chico State PID Lab";
+const char* deviceID = "Sine-Drive V1.4, Chico State PID Lab";
 
 // EEPROM Addresses
 const uint8_t SAVE_ADDRESS = 0x00;	// whether to save values of f and A in EEPROM.
@@ -195,7 +196,7 @@ void buildWaveDumb(double A) {
 	double convert = 2*M_PI/256.0;
 
 	for (int j=0;j<256;j++) {
-		phi = sin(j*convert);
+		phi = (A/R*127*sin(j*convert)+M_PI/2.0)*180.0/M_PI;
 		phaseConvert[j] = (uint8_t)(phi);
 	}
 	if (DEBUG) Serial.println("buildWaveDumb() complete");
@@ -514,6 +515,7 @@ void setup() {
 		Comms.RegisterCommand(F(":EEPRom?"), &EEPROM_state);
 		Comms.RegisterCommand(F(":EEPRom"), &setEEPROM);
 		Comms.RegisterCommand(F(":DEBUg"), &setDebugMode);
+		Comms.RegisterCommand(F(":DUMB"), &buildWaveDumb);
 
 	Comms.SetErrorHandler(&errorHandler);
 
