@@ -17,6 +17,7 @@
  * V1.2 Made all parameters EEPROM-configurable, added appropriate commands, added dump() for debug. Nothing works now.
  * V1.3 Added debug mode, got things working again. Subtle error involving geometric parameters set to zero so Amax was zero so amplitude couldn't be set to greater than zero... Anyway, it works now. 
  * V1.4 Added 'dumb' mode, which recalculates servo motion to just be sinusoidal and damn the harmonics. Dumb mode is not saved and is lost any time A is adjusted.
+ * V1.5 Added commands to report output position, as opposed to servo position. Changed some SCPI accordingly
  *
  */
 
@@ -31,8 +32,8 @@ bool DEBUG = 0;
  ****************************************/
 
 #define SCPI_ARRAY_SYZE 3
-#define SCPI_MAX_TOKENS 17
-#define SCPI_MAX_COMMANDS 24
+#define SCPI_MAX_TOKENS 18
+#define SCPI_MAX_COMMANDS 25
 
 /****************************************
  * Libraries
@@ -49,7 +50,7 @@ bool DEBUG = 0;
  ****************************************/
 
 // Identification, firmware version
-const char* deviceID = "Sine-Drive V1.4, Chico State PID Lab";
+const char* deviceID = "Sine-Drive V1.5, Chico State PID Lab";
 
 // EEPROM Addresses
 const uint8_t SAVE_ADDRESS = 0x00;	// whether to save values of f and A in EEPROM.
@@ -210,6 +211,7 @@ void help(SCPI_C commands, SCPI_P parameters, Stream& interface) {
 	interface.println("FREQuency {?|f} - query frequency, or set to floating point value f. \nNo limit on f, other than reality.");
 	interface.println("DRIVe {?|b} - query servo drive state, or set to boolean b.");
 	interface.println("MOVE {?|i} - query servo position, or set to integer degree value i. (0<=i<180)");
+	interface.println("POSItion? - reports position of output (not position of servo, which is 'MOVE?')" );
 	interface.println("CENTer - move servo to center of range. Equivalent to 'MOVE 90'.");
 	interface.println("CONFigure:RADIus {?|f} - Query or set servo arm length to float value");
 	interface.println("CONFigure:LENGth {?|f} - Query or set servo offset length to float value");
@@ -312,6 +314,13 @@ void moveServo(SCPI_Commands, SCPI_P parameters, Stream& interface) {
 		driver.write(servoPosition);
 		if (DEBUG) interface.println(servoPosition);
 	}
+}
+
+void getPosition(SCPI_Commands, SCPI_P parameters, Stream& interface) {
+	// reports current position, calculated from amplitude and phase pointer. 
+	// Probably does not give valid results if drive is not active.
+	double pos = amplitude * sin((phase/256.0)*2.0*M_PI);
+	interface.println(pos,6);
 }
 
 void whereServo(SCPI_Commands, SCPI_P parameters, Stream& interface) {
@@ -501,6 +510,7 @@ void setup() {
 	Comms.RegisterCommand(F("CENTer"), &centerServo);
 	Comms.RegisterCommand(F("MOVE"), &moveServo);
 	Comms.RegisterCommand(F("MOVE?"), &whereServo);
+	Comms.RegisterCommand(F("POSItion?"), &getPosition);
 	Comms.RegisterCommand(F("HELP"), &help);
 	Comms.SetCommandTreeBase(F("CONFigure"));
 		Comms.RegisterCommand(F(":RADIus?"), &getRadius);
