@@ -10,10 +10,13 @@ API for PID-group Sin-Driver.
 # everything here requires pyvisa.
 import pyvisa
 
-class CartDriver():
+class CartDriver:
     '''
     API for the CSU Chico PID Lab Sinusoidal Driver
 
+    '''
+    ''' 
+    self.driving is a boolean that tracks whether the driver is wiggling or not.
     '''
     driving = False
 
