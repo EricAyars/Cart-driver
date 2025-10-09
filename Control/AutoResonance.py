@@ -78,7 +78,7 @@ def getData():
 
     return (Servo, Yellow, Green)
 
-def findPhases(data):
+def findPhases(data, drive_freq):
     '''
     Analyzes Servo, Green, and Yellow, courtesy of Nick's code that I don't 
     entirely understand yet.
@@ -125,6 +125,16 @@ def findPhases(data):
         print('Peaks do not agree')
         print(freqs[peak_power_i1], peak_power_i1)
         print(freqs[peak_power_i2], peak_power_i2)
+
+        print('Saving data to take a look later')
+
+        filename = 'PositionData_'+str(np.round(drive_freq*1000))+'.npz'
+        np.savez(filename, drive_frequency=drive_freq, times = times, servo_x = servo_x,
+                 x_1 = x_1, x_2=x_2)
+        
+        # Put in some dummy values to return
+        return np.array([-1, -10, -1, -10])
+
 
     # Adjust cart phases to be relative to drive phase, and within -pi..pi.
     phase_c1 -= phase_servo
@@ -214,7 +224,7 @@ while frequency < stopF:
     servo.setFrequency(frequency)
     time.sleep(deadTime)    # wait for transient decay
     data = getData()
-    phases = findPhases(data)
+    phases = findPhases(data, frequency)
     print(phases)           # just so we know it's doing something!
     savePhases(phases)
     
