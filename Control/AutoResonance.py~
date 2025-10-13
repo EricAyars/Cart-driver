@@ -11,8 +11,6 @@ Program to control this whole experiment.
     * repeat ad nauseum
 
 Use gdx.
-Change 10/13/25: using GoDirect without the GDX wrapper, since GDX
-keeps dropping connection
 
 Arguments should be start f, stop f, f step, and filename.
 '''
