@@ -32,6 +32,7 @@ from gdx import gdx
 gdx = gdx.gdx()
 
 # CartDriver API
+import pyvisa
 from CartDriver import CartDriver
 
 ########################################
@@ -41,13 +42,13 @@ from CartDriver import CartDriver
 ########################################
 
 dT = 100            # sampling period, ms
-startF = argv[1]    # start frequency sweep, Hz
-stopF = argv[2]     # stop frequency sweep, Hz
-fStep = argv[3]     # frequency sweep step size
+startF = float(argv[1])    # start frequency sweep, Hz
+stopF = float(argv[2])     # stop frequency sweep, Hz
+fStep = float(argv[3])     # frequency sweep step size
 amplitude = 1.5     # constant amplitude (may need to make lower)
 N = 1024            # number of data points to take
 deadTime = 120      # two minutes for transient decay?
-filename = sys.argv[4]
+filename = argv[4]
 
 ########################################
 #
@@ -63,6 +64,20 @@ frequency = startF  # current frequency
 #
 ########################################
 
+def connect():
+    '''
+    gdx.open(connection='ble')
+    1: GDX-CART-Y 0D400518 BLE -78
+    2: GDX-CART-G 0V4001X3 BLE -68
+    '''
+    gdx.open(connection='ble', 
+             device_to_open="GDX-CART-Y 0D400518, GDX-CART-G 0V4001X3")
+    # hard-coded for the carts currently in my lab.
+
+    # position is sensor 1 for each cart
+    gdx.select_sensors([[1],[1]])
+
+
 def getData():
     ''' 
     fills Servo, Green, and Yellow data-vectors
@@ -73,7 +88,12 @@ def getData():
 
     gdx.start(dT)
     for j in range(N):
-        Yellow[j], Green[j] = gdx.read()
+        try:
+            Yellow[j], Green[j] = gdx.read()
+        except IndexError:
+            print('IndexError in gdx.read(), reconnecting...')
+            connect()
+            continue
         Servo[j] = servo.getPosition()
 
     return (Servo, Yellow, Green)
@@ -185,17 +205,7 @@ servo.start()
 #
 ########################################
 
-'''
-gdx.open(connection='ble')
-1: GDX-CART-Y 0D400518 BLE -78
-2: GDX-CART-G 0V4001X3 BLE -68
-'''
-gdx.open(connection='ble', 
-         device_to_open="GDX-CART-Y 0D400518, GDX-CART-G 0V4001X3")
-# hard-coded for the carts currently in my lab.
-
-# position is sensor 1 for each cart
-gdx.select_sensors([[1],[1]])
+connect()
 
 ########################################
 #
@@ -205,7 +215,7 @@ gdx.select_sensors([[1],[1]])
 
 fh = open(filename, 'w')
 fh.write('AutoResonance.py data\n')
-fh.write(time.asctime + '\n')
+fh.write(asctime() + '\n')
 fh.write(f'amplitude {amplitude:.2f}\n')
 fh.write(f'frequency range {startF:.2f} to {stopF:.2f} by {fStep:.2f} Hz\n')
 fh.write(f'sampling period {dT} ms, {N} points per sample set taken {deadTime} seconds after frequency adjustment\n')
@@ -217,12 +227,12 @@ fh.write('\nFrequency\tC1 amp\tC1 phase\tC2 Amp\tC2 phase\n')
 #
 ########################################
 
-print('Frequency sweep begun at' + time.asctime())
+print('Frequency sweep begun at ' + asctime())
 
 while frequency < stopF:
 
     servo.setFrequency(frequency)
-    time.sleep(deadTime)    # wait for transient decay
+    sleep(deadTime)    # wait for transient decay
     data = getData()
     phases = findPhases(data, frequency)
     print(phases)           # just so we know it's doing something!
@@ -248,4 +258,4 @@ servo.close()
 gdx.stop()
 gdx.close()
 
-print('Frequency sweep ended at' + time.asctime())
+print('Frequency sweep ended at ' + asctime())
