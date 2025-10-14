@@ -11,8 +11,7 @@ Program to control this whole experiment.
     * repeat ad nauseum
 
 Use gdx.
-Change 10/13/25: using GoDirect without the GDX wrapper, since GDX
-keeps dropping connection
+Change 10/14/25: hopefully fixed the dropped-connection problem: getData() was missing a gdx.stop().
 
 Arguments should be start f, stop f, f step, and filename.
 '''
@@ -90,6 +89,7 @@ def getData():
 
     gdx.start(dT)
     for j in range(N):
+        '''
         try:
             Yellow[j], Green[j] = gdx.read()
         except:
@@ -97,8 +97,11 @@ def getData():
             gdx.close()
             connect()
             continue
+        '''
+        Yellow[j], Green[j] = gdx.read()
         Servo[j] = servo.getPosition()
 
+    gdx.stop()
     return (Servo, Yellow, Green)
 
 def findPhases(data, drive_freq):

@@ -42,10 +42,6 @@ class CartDriver:
         self.inst.timeout = timeout
         print(f"Connected to: {self.inst.query('*IDN?') if hasattr(self.inst, 'query') else resource_name}")
 
-    def identify(self):
-        ''' *IDN? command '''
-        return self.inst.query('*idn?')
-
     def start(self):
         """Send 'drive 1' command to the device, update driving status."""
         self.driving = True 
