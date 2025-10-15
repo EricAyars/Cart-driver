@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.6)  23 SEP 2025 14:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.6)  15 OCT 2025 12:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -221,39 +221,53 @@ Overfull \hbox (73.62pt too wide) in paragraph at lines 93--94
  []
 
 [3]
-Overfull \hbox (9.21318pt too wide) in paragraph at lines 119--120
+<2-cart_response.pdf, id=41, 462.52798pt x 346.89601pt>
+File: 2-cart_response.pdf Graphic file (type pdf)
+<use 2-cart_response.pdf>
+Package pdftex.def Info: 2-cart_response.pdf  used on input line 113.
+(pdftex.def)             Requested size: 462.52684pt x 346.89516pt.
+
+Overfull \hbox (102.52684pt too wide) in paragraph at lines 113--114
+ [] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (9.21318pt too wide) in paragraph at lines 124--125
 \OT1/cmr/m/n/10.95 for this de-vice are avail-able on GitHub at https://github.
 com/EricAyars/Cart-
  []
 
-[4] [5] [6 <./comparison.pdf>] [7 <./device.png>] (./CartDriverAJP.aux) ) 
+[4] [5 <./comparison.pdf>] [6 <./device.png>] [7 <./2-cart_response.pdf>]
+(./CartDriverAJP.aux) ) 
 Here is how much of TeX's memory you used:
- 2612 strings out of 478268
- 42929 string characters out of 5846348
- 339481 words of memory out of 5000000
- 20802 multiletter control sequences out of 15000+600000
+ 2620 strings out of 478268
+ 43141 string characters out of 5846348
+ 339489 words of memory out of 5000000
+ 20810 multiletter control sequences out of 15000+600000
  476779 words of font info for 54 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,8n,67p,366b,276s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/
-local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/l
-ocal/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/lo
-cal/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/loc
-al/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/loca
-l/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/
-texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/te
-xlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texl
-ive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texliv
-e/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2
-022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2022
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2022/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2022/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2022/texmf
--dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on CartDriverAJP.pdf (7 pages, 10812044 bytes).
+ 60i,8n,67p,367b,276s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2022/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmbx10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmbx12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmex10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmmi10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmmi8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmr12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmr17.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mr6.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8
+.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pf
+b></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><
+/usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
+Output written on CartDriverAJP.pdf (7 pages, 10825402 bytes).
 PDF statistics:
- 158 PDF objects out of 1000 (max. 8388607)
- 79 compressed objects within 1 object stream
+ 207 PDF objects out of 1000 (max. 8388607)
+ 84 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
