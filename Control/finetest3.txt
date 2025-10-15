@@ -1,9 +1,0 @@
-AutoResonance.py data
-Mon Oct 13 12:24:25 2025
-amplitude 1.50
-frequency range 0.25 to 0.70 by 0.05 Hz
-sampling period 100 ms, 1024 points per sample set taken 120 seconds after frequency adjustment
-
-Frequency	C1 amp	C1 phase	C2 Amp	C2 phase
-0.25	6.71389	-0.85323	4.45128	-0.98692
-0.30	-1.00000	-10.00000	-1.00000	-10.00000
