@@ -1,31 +1,38 @@
-\documentclass[11 pt]{article}
+\documentclass[prb,preprint]{revtex4-1}
 \usepackage{graphicx}
-%\usepackage{mysty}
 \usepackage{amsmath}
 
-\title{Computer-controlled sinusoidal drive mechanism for dynamics carts}
-% Better title suggestions are welcome!
-
-\author{Eric Ayars and Nicholas Nelson}
-
 \begin{document}
-\maketitle
+
+\title{Computer-controlled sinusoidal drive mechanism}
+
+\author{Eric Ayars}
+\affiliation{California State University Chico}
+\email{eayars@csuchico.edu}
+\author{Nicholas Nelson}
+\affiliation{California State University Chico}
+
+\date{\today}
 
 \begin{abstract}
 We describe an inexpensive computer-controlled sinusoidal drive mechanism for dynamics carts (and other applications) with applications for resonance and normal-modes experiments.
 The driver arm moves in a non-sinusoidal motion such that the cosine error inherent to its design \emph{corrects} the motion, making the output a more nearly pure sine wave than commercially-available drivers.
 \end{abstract}
 
-Dynamics carts and tracks are in such heavy use in introductory physics courses that a list of uses is unnecessary for readers of this journal.
-They are less commonly used in the advanced undergraduate mechanics course, however.
-Recently, one of the authors wanted to use dynamics carts in their mechanics course to show resonance response curves and normal modes, and needed a sinusoidal drive mechanism.
+\maketitle
 
-\subsection*{Existing solutions}
+\section{Introduction}
+
+Dynamics carts and tracks are in such common use in introductory physics courses that a list of applications is unnecessary for readers of this journal.
+They are less commonly used in the advanced undergraduate mechanics course, however.
+Recently, one of the authors wanted to use dynamics carts in their mechanics course to show resonance response curves and normal modes, and needed a robust sinusoidal drive mechanism.
+
+\section{Existing solutions}
 There are several commercial options available for this; none of them are ideal. 
-One option is a ``speaker''-type driver, such as the Vernier Power Amplifier Accessory Speaker.\footnote{https://www.vernier.com/product/power-amplifier-accessory-speaker/}\  
+One option is a ``speaker''-type driver, such as the Vernier Power Amplifier Accessory Speaker.\cite{VernierSpeaker}  
 This type of driver uses an AC signal to a long-throw bass speaker coil and magnet to drive oscillations. 
 The frequency can be precisely controlled using the function generator providing the AC signal, but the amplitude of oscillation depends on the load, and the position of the driver is only approximately sinusoidal at low amplitudes and high frequencies.
-Another commercially-available option is the ``circular'' driver, such as the PASCO ME-8750.\footnote{https://www.pasco.com/products/lab-apparatus/mechanics/dynamics-accessories/mechanical-oscillator-driver}\ 
+Another commercially-available option is the ``circular'' driver, such as the PASCO ME-8750.\cite{PascoMotor} 
 This type uses a geared DC motor with a string attached at some radius $R$ from the axis. The string then goes through a guide, converting the angular position $\theta$ of the motor to linear position $x$. (See figure \ref{fig:circular}, which also shows various parameters for later calculations.) 
 For $L\gg R$, $x$ is approximately sinusoidal. 
 The amplitude of the motion for this driver is independent of load, and the frequency can be adjusted with acceptable precision by changing the voltage to the motor.
@@ -41,7 +48,7 @@ These frequency components can cause artifacts when sweeping across a range of f
 	\label{fig:circular}
 \end{figure}
 
-\subsection*{Our approach}
+\section{Our approach}
 We decided to use geometry identical to that of the circular driver in figure \ref{fig:circular} but with a servomotor from a radio-control car steering system providing an oscillatory motion, instead of driving the motion in a full circle at a constant angular velocity. 
 Controlling a servo is very easy with a microcontroller: we chose a Teensy 4.0 for its combination of low price, high speed, breadboard-friendly form factor, and floating-point math capability.
 Using an oscillating servomotor output allows complete on-the-fly control of both frequency and amplitude, as well as precise static positioning when desired. 
@@ -69,7 +76,7 @@ A few more careful steps of algebra give us an equation for the desired motion o
 	\phi(t) = \sin^{-1} \left[\frac{1}{2RL}\left(2\ell_o A\sin(\omega t) + A^2 \sin^2(\omega t)\right)\right]
 \end{equation}
 
-Equation \ref{eq:phi}\ is not particularly user-friendly, but one can check it for special cases. 
+Equation (\ref{eq:phi}) is not particularly user-friendly, but one can check it for special cases. 
 By geometric necessity $A<R$, so if $R\ll L$ then $\ell_o \approx L$, $\phi$ is small, and 
 \[ \phi(t) \approx \frac{A}{R}\sin(\omega t) \]
 as one would expect for this limiting-case geometry.
@@ -78,7 +85,8 @@ In this case, the first term dominates and $\phi(t) \propto \sin(\omega t)$ as o
 
 For the general case, though, the microcontroller can move the servo through the curve described by equation \ref{eq:phi}\ just as easily as through a sine curve. 
 Instead of building a LUT containing for $A\sin(\omega t)$ for each $t$ point, the microcontroller needs to build the LUT with values for $\phi(t)$.
-The array will depend on $A$, so the LUT must be recalculated each time the amplitude is adjusted; but the Teensy microcontroller can recalculate an array of 256 LUT values in a few hundred microseconds.
+The LUT will depend on $A$, so the LUT must be recalculated each time the amplitude is adjusted. 
+The Teensy microcontroller can recalculate an array of 256 LUT values in a few hundred microseconds, a negligible delay that occurs only on amplitude changes in any case.
 
 \begin{figure}[ht]
 	\begin{center}
@@ -96,7 +104,7 @@ The array will depend on $A$, so the LUT must be recalculated each time the ampl
 	\label{fig:device}
 \end{figure}
 
-Figure \ref{fig:motion} shows the non-sinusoidal motion of the servo end ($R\phi$) and the resulting sinusoidal motion of the output $x$, as measured by a Vernier GoDirect Sensor Cart\footnote{https://www.vernier.com/product/go-direct-sensor-cart/}.
+Figure \ref{fig:motion} shows the non-sinusoidal motion of the servo end ($R\phi$) and the resulting sinusoidal motion of the output $x$, as measured by a Vernier GoDirect Sensor Cart.\cite{VernierCart}
 
 The final construction step was to design a simple 3D-printed mount to hold the servo and the microcontroller board in place at one end of the dynamics track. 
 See figure \ref{fig:device}.
@@ -116,12 +124,21 @@ See figure \ref{fig:2-carts}.
 	\label{fig:2-carts}
 \end{figure}
 
-\subsection*{Conclusions}
+\section{Conclusions}
 By using a microcontroller to move a servo arm through a non-sinusoidal path in a geometry in which cosine errors exist, we can use the cosine error to make the motion sinusoidal.
 The microcontroller also provides computer control of frequency, amplitude, and (if desired) static position of the driver and allows easy control of the device via Python, LabVIEW, and other programming languages.
 
-\subsection*{Want to build one?}
+\section{Want to build one?}
 Microcontroller firmware, example Python control code, and 3D print files for this device are available on GitHub at https://github.com/EricAyars/Cart-driver
+
+\begin{thebibliography}{3}
+\bibitem{VernierSpeaker} Vernier Science Educaton ``Power Amplifier Accessory Speaker''' \url{<https://www.vernier.com/product/power-amplifier-accessory-speaker/>}
+
+\bibitem{PascoMotor} PASCO Scientific ``Mechanical Oscillator Driver''' \url{<https://www.pasco.com/products/lab-apparatus/mechanics/dynamics-accessories/mechanical-oscillator-driver>}
+
+\bibitem{VernierCart} Vernier Science Education ``GoDirect Sensor Cart'' \url{<https://www.vernier.com/product/go-direct-sensor-cart/>}
+
+\end{thebibliography}
 
 \end{document}
 
