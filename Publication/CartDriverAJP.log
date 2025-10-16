@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.6)  15 OCT 2025 15:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.1.6)  16 OCT 2025 09:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -275,69 +275,69 @@ e
 
 pdfTeX warning: pdflatex (file ./geometry.pdf): PDF inclusion: found PDF versio
 n <1.7>, but at most version <1.5> allowed
-<geometry.pdf, id=12, 192.18199pt x 90.01097pt>
+<geometry.pdf, id=10, 192.18199pt x 90.01097pt>
 File: geometry.pdf Graphic file (type pdf)
 <use geometry.pdf>
 Package pdftex.def Info: geometry.pdf  used on input line 45.
-(pdftex.def)             Requested size: 192.18152pt x 90.01074pt.
+(pdftex.def)             Requested size: 289.07999pt x 135.41167pt.
 [2] [3 <./geometry.pdf>]
-<comparison.pdf, id=35, 462.52798pt x 346.89601pt>
+<comparison.pdf, id=34, 462.52798pt x 346.89601pt>
 File: comparison.pdf Graphic file (type pdf)
 <use comparison.pdf>
-Package pdftex.def Info: comparison.pdf  used on input line 93.
-(pdftex.def)             Requested size: 462.52684pt x 346.89516pt.
-<device.png, id=36, 3007.235pt x 2834.59pt>
+Package pdftex.def Info: comparison.pdf  used on input line 101.
+(pdftex.def)             Requested size: 361.34999pt x 271.02771pt.
+<device.png, id=35, 3007.235pt x 2834.59pt>
 File: device.png Graphic file (type png)
 <use device.png>
-Package pdftex.def Info: device.png  used on input line 101.
-(pdftex.def)             Requested size: 433.62pt x 408.69102pt.
+Package pdftex.def Info: device.png  used on input line 109.
+(pdftex.def)             Requested size: 361.34999pt x 340.56865pt.
  [4]
 <2-cart_response.pdf, id=43, 462.52798pt x 346.89601pt>
 File: 2-cart_response.pdf Graphic file (type pdf)
 <use 2-cart_response.pdf>
-Package pdftex.def Info: 2-cart_response.pdf  used on input line 121.
+Package pdftex.def Info: 2-cart_response.pdf  used on input line 129.
 (pdftex.def)             Requested size: 462.52684pt x 346.89516pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[5 <./comparison.pdf>] [6 <./device.png>]
-Underfull \hbox (badness 3623) in paragraph at lines 137--138
+[5 <./comparison.pdf>]
+Underfull \hbox (badness 3623) in paragraph at lines 147--148
 []\OT1/cmr/m/n/10.95 PASCO Sci-en-tific ``Me-chan-i-cal Os-cil-la-tor Driver'''
  $\OT1/cmtt/m/n/10.95 <[]https : / / www . pasco . com / products /
  []
 
-[7 <./2-cart_response.pdf>]
+[6 <./device.png>]
 No file CartDriverAJP.bbl.
-[8] (./CartDriverAJP.aux) ) 
+[7 <./2-cart_response.pdf>] (./CartDriverAJP.aux) ) 
 Here is how much of TeX's memory you used:
  4677 strings out of 478268
- 71369 string characters out of 5846348
+ 71365 string characters out of 5846348
  381391 words of memory out of 5000000
  22846 multiletter control sequences out of 15000+600000
- 475810 words of font info for 51 fonts, out of 8000000 for 9000
+ 475583 words of font info for 50 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,7n,67p,367b,329s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2022/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmex10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmmi10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmmi12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmmi8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsf
-onts/cm/cmr10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmr12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmr6.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmr8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cm
-sy10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cms
-y8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmti1
-0.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12
-.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.
-pfb>
-Output written on CartDriverAJP.pdf (8 pages, 10841280 bytes).
+ 60i,7n,67p,367b,327s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2022/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2022/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2022/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2022/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2022/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2022/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2022/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2022/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2022/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2022/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2022/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmti12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmtt10.pfb>
+Output written on CartDriverAJP.pdf (7 pages, 10838683 bytes).
 PDF statistics:
- 215 PDF objects out of 1000 (max. 8388607)
- 89 compressed objects within 1 object stream
+ 212 PDF objects out of 1000 (max. 8388607)
+ 87 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
