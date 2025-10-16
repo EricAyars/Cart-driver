@@ -87,11 +87,11 @@ def extract_amp_and_phase(filepath, delta_t, make_plots=False):
     return amps, phases
 
 
-datadir = '/Users/njnelson/Research/CartDriver/Cart-driver/data/Nick/'
+datadir = '/Users/njnelson/Research/Cart-driver/data/Nick/'
 
 dt = 1/50.0
 
-files = os.listdir('/Users/njnelson/Research/CartDriver/Cart-driver/data/Nick/')
+files = os.listdir(datadir)
 data_files = []
 freqs = []
 for file in files:
