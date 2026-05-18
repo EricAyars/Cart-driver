@@ -92,9 +92,9 @@ When $R$ is not small compared to $L$, one can consider the limiting case of $A 
 In this case, the first term dominates and $\phi(t) \propto \sin(\omega t)$ as one would intuitively expect. 
 
 For the general case, though, the microcontroller can move the servo through the curve described by equation (\ref{eq:phi}) just as easily as through a sine curve. 
-Instead of building a LUT containing values of $A\sin(\omega t)$ at each $t$ point, the microcontroller needs to build the LUT with values of $\phi(t)$.
+Instead of building a LUT containing for $A\sin(\omega t)$ for each $t$ point, the microcontroller needs to build the LUT with values for $\phi(t)$.
 The values of $\phi$ depend on $A$, so the LUT must be recalculated each time the amplitude is adjusted. 
-The Teensy microcontroller can recalculate this array of 256 LUT values in a few hundred microseconds, a negligible delay that occurs only on amplitude changes.
+The Teensy microcontroller can recalculate an array of 256 LUT values in a few hundred microseconds, a negligible delay that occurs only on amplitude changes in any case.
 
 \begin{figure}[ht]
 	\begin{center}
