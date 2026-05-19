@@ -1,0 +1,4 @@
+We describe an inexpensive computer-controlled sinusoidal drive mechanism for dynamics carts
+(and other applications) with applications for resonance and normal-modes experiments. The driver
+arm moves in a non-sinusoidal motion such that the cosine error inherent to its design actually corrects the
+motion, making the output a more nearly pure sine wave than commercially-available drivers. The driver is inexpensive to build, and can be easily adapted to a variety of applications. 
