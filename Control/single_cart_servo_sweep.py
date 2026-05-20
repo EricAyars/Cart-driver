@@ -32,7 +32,7 @@ import numpy as np
 from gdx import gdx
 gdx = gdx.gdx()
 
-Cart_ID = 'GDX-CART-Y 0D1017T7'
+Cart_ID = 'GDX-CART-Y 0D1015C1'
 
 # CartDriver API
 import pyvisa
@@ -48,9 +48,9 @@ dT = 100            # sampling period, ms
 startF = float(argv[1])    # start frequency sweep, Hz
 stopF = float(argv[2])     # stop frequency sweep, Hz
 fStep = float(argv[3])     # frequency sweep step size
-amplitude = 2.0     # constant amplitude (may need to make lower)
+amplitude = .45     # constant amplitude (set to match speaker)
 N = 1024            # number of data points to take
-deadTime = 120      # two minutes for transient decay?
+deadTime = 60      # two minutes for transient decay? no, one should be fine.
 filename = argv[4]
 
 ########################################
@@ -221,6 +221,7 @@ print('Frequency sweep begun at ' + asctime())
 while frequency < stopF:
 
     servo.setFrequency(frequency)
+    print(f'Frequency = {frequency:0.2f}')
     sleep(deadTime)    # wait for transient decay
     data = getData()
     phases = findPhases(data, frequency)
