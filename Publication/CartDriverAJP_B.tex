@@ -138,6 +138,15 @@ This allows for the collection of phase information for the driver, which is not
 (Note the phase information in figure \ref{fig:2-carts}.)
 It also allows for the the synchronization of data to drive position, so that if for example one were using this to drive a chaotic oscillator one could collect data to generate a full set of Poincar\'e sections.
 
+\section{Limitations}
+The main limitation to this design of driver is the maximum frequency available. 
+Due to the response time of the servo, the maximum frequency is around 3--5Hz, depending on the amplitude of motion.
+This range of frequencies works well for apparatus such as carts and Duffing oscillators and other mechanical systems, but if higher frequencies are necessary the speaker-type driver may be a better choice despite its limitations.
+
+Another limitation is that the output becomes noticeably `stepped' at low amplitudes.
+The servo is controlled by a pulse-width modulation (PWM) signal, and the resolution of the PWM signal is finite.
+At low amplitudes, the change in $\phi$ between adjacent LUT values becomes smaller than the resolution of the PWM signal, so the servo cannot be moved to the desired position and instead jumps to one of the two closest positions it can achieve. 
+If low amplitudes are desired, it is best to use a smaller servo arm (smaller value of $R$) to increase the required change in $\phi$ for a given change in $x$, but then that limits the maximum amplitude. 
 
 \section{Conclusions}
 By using a microcontroller to move a servo arm in a geometry for which there is cosine error, we can use the microcontroller to generate a specific non-sinusoidal motion which the cosine error then corrects to make the motion sinusoidal.
