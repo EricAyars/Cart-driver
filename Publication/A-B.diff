@@ -1,0 +1,44 @@
+18,19c18,20
+< We describe an inexpensive computer-controlled sinusoidal drive mechanism for dynamics carts (and other applications) with applications for resonance and normal-modes experiments.
+< The driver arm moves in a non-sinusoidal motion such that the cosine error inherent to its design \emph{corrects} the motion, making the output a more nearly pure sine wave than commercially-available drivers.
+---
+> We describe an inexpensive computer-controlled sinusoidal drive mechanism for dynamics carts (and other applications) with applications for resonance, normal-modes, and chaos experiments.
+> The driver arm moves in a non-sinusoidal motion such that the cosine error inherent to its design \emph{corrects} the motion, making the output a more nearly single-frequency wave than commercially-available drivers.
+> In addition, the design facilitates easy access to the drive position at any point in time, allowing for the collection of phase information and synchronization of data to drive position.
+34a36,37
+> There are significant higher harmonics in the driver motion which can cause experimental artifacts particularly in sensitive resonance and chaos experiments.
+> Depending on the function generator used, a trigger signal may be available to synchronize data acquisition, but at most once per period so driver position is not precisely known.
+36c39
+< This type uses a geared DC motor with a string attached at some radius $R$ from the axis. The string then goes through a guide, converting the angular position $\theta$ of the motor to linear position $x$. (See figure \ref{fig:circular}, which also shows various parameters for later calculations.) 
+---
+> This type uses a geared DC motor with an arm attaching a string at some radius $R$ from the axis. The string then goes through a guide, converting the angular position $\theta$ of the motor to linear position $x$. (See figure \ref{fig:circular}, which also shows various parameters for later calculations.) 
+39c42
+< The disadvantage of the circular driver is twofold: it's impossible to adjust the amplitude on the fly, and $x$ is only \emph{approximately} sinusoidal, for $R \ll L$.
+---
+> There are multiple limitations in the circular driver: it's impossible to adjust the amplitude on the fly, precise position information is not available, precise frequency control is difficult, and $x$ is only approximately sinusoidal when $R \ll L$.
+41c44
+< These frequency components can cause artifacts when sweeping across a range of frequencies to determine the resonances of the system.
+---
+> As with the ``speaker'' type drier, these frequency components can cause measurement artifacts.
+61c64
+< But we didn't want the servo motion $\phi$ to be sinusoidal, we wanted $x$ to be sinusoidal!
+---
+> But we don't want the servo motion $\phi$ to be sinusoidal, we want $x$ to be sinusoidal!
+97c100
+< The Teensy microcontroller can recalculate this array of 256 LUT values in a few hundred microseconds, a negligible delay that occurs only on amplitude changes.
+---
+> The Teensy microcontroller can recalculate this array of 256 LUT values in a few hundred microseconds, a negligible delay which in any case occurs only on amplitude changes.
+126d128
+< 
+133a136,139
+> In addition, it should be noted that since the microcontroller is generating the output waveform stepwise with a LUT, it is trivial to obtain exact position data for the driver at any point in time. 
+> This allows for the collection of phase information for the driver, which is not available with the commercially-available options described here. 
+> (Note the phase information in figure \ref{fig:2-carts}.)
+> It also allows for the the synchronization of data to drive position, so that if for example one were using this to drive a chaotic oscillator one could collect data to generate a full set of Poincar\'e sections.
+134a141
+> 
+137c144,145
+< The microcontroller also provides computer control of frequency, amplitude, and (if desired) static position of the driver and allows easy control of the device via Python, LabVIEW, and other programming languages.
+---
+> The microcontroller also provides computer control of frequency, amplitude, and (if desired) static position of the driver and allows easy control of the device via Python, LabVIEW, and other programming languages. 
+> The device allows for time-synchronized position data, which opens up numerous possibilities for experiments beyond the introductory course.
