@@ -32,6 +32,8 @@ import numpy as np
 from gdx import gdx
 gdx = gdx.gdx()
 
+Cart_ID = 'GDX-CART-Y 0D1017T7'
+
 # CartDriver API
 import pyvisa
 from CartDriver import CartDriver
@@ -73,7 +75,7 @@ def connect():
     '''
     # adjust for cart!
     gdx.open(connection='ble', 
-             device_to_open="GDX-CART-Y 0D101717")
+             device_to_open=Cart_ID)
     # hard-coded for the carts currently in my lab.
 
     # position is sensor 1 for each cart (only one.)
@@ -99,7 +101,7 @@ def getData():
             connect()
             continue
         '''
-        cart[j] = gdx.read()
+        cart[j] = gdx.read()[0]
         Servo[j] = servo.getPosition()
 
     gdx.stop()
@@ -132,40 +134,19 @@ def findPhases(data, drive_freq):
     peak_power_i1 = np.argmax(power_1[1:])+1
     #peak_power_i2 = np.argmax(power_2[1:])+1
 
-    if peak_power_i1 == peak_power_i2:
-        peak_i = peak_power_i2
-        amp_servo = np.abs(spec_servo[peak_i])
-        amp_1 = np.abs(spec_1[peak_i])
-        #amp_2 = np.abs(spec_2[peak_i])
+    peak_i = peak_power_i1
+    amp_servo = np.abs(spec_servo[peak_i])
+    amp_1 = np.abs(spec_1[peak_i])
 
-        phase_servo = np.arctan2(np.imag(spec_servo[peak_i]), np.real(spec_servo[peak_i]))
-        phase_c1 = np.arctan2(np.imag(spec_1[peak_i]), np.real(spec_1[peak_i]))
-        #phase_c2 = np.arctan2(np.imag(spec_2[peak_i]), np.real(spec_2[peak_i]))
+    phase_servo = np.arctan2(np.imag(spec_servo[peak_i]), np.real(spec_servo[peak_i]))
+    phase_c1 = np.arctan2(np.imag(spec_1[peak_i]), np.real(spec_1[peak_i]))
 
-        print('Servo Amp: ', np.round(amp_servo,3), ' Phase: ', np.round(phase_servo,3))
-        print('Cart     : ', np.round(amp_1,3), ' Phase: ', np.round(phase_c1,3))
-        #print('Cart 2   : ', np.round(amp_2,3), ' Phase: ', np.round(phase_c2,3))
-    else:
-        '''
-        I am worried about this 'else' here. Nick, do I need to worry? If not, can we 86 it?
-        '''
-        print('Peaks do not agree')
-        print(freqs[peak_power_i1], peak_power_i1)
-        #print(freqs[peak_power_i2], peak_power_i2)
-
-        print('Saving data to take a look later')
-
-        filename = 'PositionData_'+str(np.round(drive_freq*1000))+'.npz'
-        np.savez(filename, drive_frequency=drive_freq, times = times, servo_x = servo_x,
-                 x_1 = x_1)
-        
-        # Put in some dummy values to return
-        return np.array([-1, -10, -1, -10])
+    print('Servo Amp: ', np.round(amp_servo,3), ' Phase: ', np.round(phase_servo,3))
+    print('Cart     : ', np.round(amp_1,3), ' Phase: ', np.round(phase_c1,3))
 
 
     # Adjust cart phases to be relative to drive phase, and within -pi..pi.
     phase_c1 -= phase_servo
-    phase_c2 -= phase_servo
     while phase_c1 < -np.pi:
         phase_c1 += 2.0*np.pi
     while phase_c1 > np.pi:

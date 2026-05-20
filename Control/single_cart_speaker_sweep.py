@@ -1,7 +1,7 @@
 '''
-single_cart_speaker_sweep.py
+single_cart_servo_sweep.py
 Eric Ayars
-Modified from single_cart_servo_sweep.py 5/18/26
+Modified from AutoResonance.py 5/18/26
 
 Program to sweep through a resonance range for a single cart.
     * adjust frequency
@@ -9,7 +9,6 @@ Program to sweep through a resonance range for a single cart.
     * take 1024 points on demand: time, drive for a single cart
     * analyze fft, save values
     * repeat ad nauseum
-But this one drives a function generator.
 
 Use gdx.
 Change 10/14/25: hopefully fixed the dropped-connection problem: getData() was missing a gdx.stop().
@@ -33,9 +32,11 @@ import numpy as np
 from gdx import gdx
 gdx = gdx.gdx()
 
+Cart_ID = 'GDX-CART-Y 0D1017T7'
+
 # CartDriver API
 import pyvisa
-from CartDriver import CartDriver
+#from CartDriver import CartDriver
 
 ########################################
 #
@@ -74,11 +75,11 @@ def connect():
     '''
     # adjust for cart!
     gdx.open(connection='ble', 
-             device_to_open="GDX-CART-Y 0D400518, GDX-CART-G 0V4001X3")
+             device_to_open=Cart_ID)
     # hard-coded for the carts currently in my lab.
 
     # position is sensor 1 for each cart (only one.)
-    gdx.select_sensors([[1])
+    gdx.select_sensors([[1]])
 
 
 def getData():
@@ -100,8 +101,8 @@ def getData():
             connect()
             continue
         '''
-        cart[j] = gdx.read()
-        Servo[j] = servo.getPosition()
+        cart[j] = gdx.read()[0]
+        #Servo[j] = servo.getPosition()
 
     gdx.stop()
     return (Servo, cart)
@@ -133,40 +134,19 @@ def findPhases(data, drive_freq):
     peak_power_i1 = np.argmax(power_1[1:])+1
     #peak_power_i2 = np.argmax(power_2[1:])+1
 
-    if peak_power_i1 == peak_power_i2:
-        peak_i = peak_power_i2
-        amp_servo = np.abs(spec_servo[peak_i])
-        amp_1 = np.abs(spec_1[peak_i])
-        #amp_2 = np.abs(spec_2[peak_i])
+    peak_i = peak_power_i1
+    amp_servo = np.abs(spec_servo[peak_i])
+    amp_1 = np.abs(spec_1[peak_i])
 
-        phase_servo = np.arctan2(np.imag(spec_servo[peak_i]), np.real(spec_servo[peak_i]))
-        phase_c1 = np.arctan2(np.imag(spec_1[peak_i]), np.real(spec_1[peak_i]))
-        #phase_c2 = np.arctan2(np.imag(spec_2[peak_i]), np.real(spec_2[peak_i]))
+    phase_servo = np.arctan2(np.imag(spec_servo[peak_i]), np.real(spec_servo[peak_i]))
+    phase_c1 = np.arctan2(np.imag(spec_1[peak_i]), np.real(spec_1[peak_i]))
 
-        print('Servo Amp: ', np.round(amp_servo,3), ' Phase: ', np.round(phase_servo,3))
-        print('Cart     : ', np.round(amp_1,3), ' Phase: ', np.round(phase_c1,3))
-        #print('Cart 2   : ', np.round(amp_2,3), ' Phase: ', np.round(phase_c2,3))
-    else:
-        '''
-        I am worried about this 'else' here. Nick, do I need to worry? If not, can we 86 it?
-        '''
-        print('Peaks do not agree')
-        print(freqs[peak_power_i1], peak_power_i1)
-        #print(freqs[peak_power_i2], peak_power_i2)
-
-        print('Saving data to take a look later')
-
-        filename = 'PositionData_'+str(np.round(drive_freq*1000))+'.npz'
-        np.savez(filename, drive_frequency=drive_freq, times = times, servo_x = servo_x,
-                 x_1 = x_1)
-        
-        # Put in some dummy values to return
-        return np.array([-1, -10, -1, -10])
+    print('Servo Amp: ', np.round(amp_servo,3), ' Phase: ', np.round(phase_servo,3))
+    print('Cart     : ', np.round(amp_1,3), ' Phase: ', np.round(phase_c1,3))
 
 
     # Adjust cart phases to be relative to drive phase, and within -pi..pi.
     phase_c1 -= phase_servo
-    phase_c2 -= phase_servo
     while phase_c1 < -np.pi:
         phase_c1 += 2.0*np.pi
     while phase_c1 > np.pi:
@@ -177,7 +157,7 @@ def findPhases(data, drive_freq):
     #    phase_c2 -= 2.0*np.pi
 
     #return np.array([amp_1, phase_c1, amp_2, phase_c2])
-    return np.array([amp_1, phase_c1)
+    return np.array([amp_1, phase_c1])
 
 
 def savePhases(data):
@@ -199,14 +179,15 @@ def savePhases(data):
 rm = pyvisa.ResourceManager()
 devices = rm.list_resources()
 #usually this is the last thing attached...
-servo = CartDriver(devices[-1])
+afg = rm.open_resource(devices[0])
 
 # set up
-servo.setAmplitude(amplitude)
+print(afg.query("*idn?"))
+afg.write("SOUR1:FREQ 0.2")
+afg.write("SOUR1:AMPL 20")
 
 # have it warm up while carts are connected
-servo.setFrequency(startF)
-servo.start()
+afg.write("OUTP1:STAT ON")
 
 ########################################
 #
@@ -240,7 +221,8 @@ print('Frequency sweep begun at ' + asctime())
 
 while frequency < stopF:
 
-    servo.setFrequency(frequency)
+    afg.write(f'SOUR1:FREQ {frequency:0.2f}' )
+    print(f'Frequency: {frequency:0.2f}')
     sleep(deadTime)    # wait for transient decay
     data = getData()
     phases = findPhases(data, frequency)
@@ -260,9 +242,8 @@ while frequency < stopF:
 
 fh.close()
 
-servo.stop()
-servo.center()
-servo.close()
+afg.close()
+rm.close()
 
 gdx.stop()
 gdx.close()
