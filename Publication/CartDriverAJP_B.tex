@@ -26,7 +26,7 @@ In addition, the design facilitates easy access to the drive position at any poi
 
 Dynamics carts and tracks are in such common use in introductory physics courses that a list of applications is unnecessary for readers of this journal.
 They are less commonly used in the advanced undergraduate mechanics course, however.
-Recently, one of the authors wanted to use dynamics carts in their mechanics course to show resonance response curves and normal modes, and needed a robust sinusoidal drive mechanism.
+Recently, one of the authors wanted to use dynamics carts in their upper-division mechanics course to show resonance response curves and normal modes, and needed a robust sinusoidal drive mechanism.
 
 \section{Existing solutions}
 There are several commercial options available for this; none of them are ideal. 
@@ -130,7 +130,7 @@ See figure \ref{fig:2-carts}.
 	\begin{center}
 		\includegraphics{2-cart_response}
 	\end{center}
-	\caption{Amplitude and phase response for two Vernier GoDirect Carts connected by springs, showing the normal mode resonances as well as the phase differences between the carts and the driver.}
+	\caption{Amplitude and phase response for two Vernier GoDirect Carts connected by springs, showing the normal mode resonances as well as the corresponding phase differences between the carts and the driver.}
 	\label{fig:2-carts}
 \end{figure}
 In addition, it should be noted that since the microcontroller is generating the output waveform stepwise with a LUT, it is trivial to obtain exact position data for the driver at any point in time. 
@@ -138,10 +138,17 @@ This allows for the collection of phase information for the driver, which is not
 (Note the phase information in figure \ref{fig:2-carts}.)
 It also allows for the the synchronization of data to drive position, so that if for example one were using this to drive a chaotic oscillator one could collect data to generate a full set of Poincar\'e sections.
 
+\section{Additional Applications}
+Although the purpose of this design is to generate a sinusoidal motion, the device is not limited to sinusoidal motion.
+By calculating appropriate LUT values, the microcontroller can drive any arbitrary motion of the servo arm, within the limits set by the servo speed. 
+Applications that could be of particular interest in labs beyond the first year include multi-frequency drive output for investigations of mode-locking and other nonlinear phenomena, or driving with beats for investigations of energy transfer between modes.
+Modifications to the circuit and firmware could allow for experimental feedback so that the drive frequency or amplitude is adjusted in real time based on the response of the system being driven.
+This could be used for investigations of control theory and similar applications.
+
 \section{Limitations}
 The main limitation to this design of driver is the maximum frequency available. 
 Due to the response time of the servo, the maximum frequency is around 3--5Hz, depending on the amplitude of motion.
-This range of frequencies works well for apparatus such as carts and Duffing oscillators and other mechanical systems, but if higher frequencies are necessary the speaker-type driver may be a better choice despite its limitations.
+This range of frequencies works well for apparatus such as carts and Duffing oscillators and other mechanical systems, but if higher frequencies are necessary the speaker-type driver may be a better choice despite its harmonic limitations.
 
 Another limitation is that the output becomes noticeably `stepped' at low amplitudes.
 The servo is controlled by a pulse-width modulation (PWM) signal, and the resolution of the PWM signal is finite.
