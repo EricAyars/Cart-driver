@@ -1,0 +1,14 @@
+Hello John,
+
+Thank you for the excellent edits. They do improve the paper -- I tend to know what I'm writing about well enough that I don't clarify sufficiently for another colleague who hasn't built the thing themselves, and your suggestions make it a better paper. Thanks.
+
+I accepted most of the edits you provided; the only one I didn't just accept was the explanation of cosine error. That did need better clarification, but I'm not sure that 'rotation plane' is the right clarification. Oh, and you suggested 'voltage' rather than just 'output' of the microcontroller, but in this case it's not sending out voltage it's sending out a servo PWM control signal. Since that part is describing the general process by which a microcontroller uses a LUT to generate a signal, I think it's better to leave the form/units of the output general also.
+
+The figure has been re-drawn to show that it's an arm not a disk. 
+
+I've added a circuit to the supplemental materials file. I don't think there's much advantage putting the circuit into the actual paper, as it's merely power-supply and a single wire from microcontroller to servo.
+
+Thanks again. I'm really hoping that this is done now because I leave for Scotland in about two hours and I will have limited internet access for the next two weeks! I'm going sailing in the Hebrides, and out to St. Kilda if weather permits. I'll check email when I can, but I won't be able to make any technical edits such as graphic file modifications or circuit diagrams until I get back.
+
+Best wishes,
+Eric
