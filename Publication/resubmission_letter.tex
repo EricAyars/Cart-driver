@@ -1,0 +1,40 @@
+\documentclass[12pt]{letter}
+% Letter form, formatted for CSUC letterhead 
+
+\begin{document}
+
+\signature{Dr. Eric Ayars \\ Professor of Physics \\ CSU Chico Department of Physics}
+
+\begin{letter}{}
+	
+\opening{Dear Dr. Essick,}
+
+Please convey our gratitude to both reviewers for their time and effort in reviewing our manuscript.
+We have carefully considered their comments and have made additions to the manuscript accordingly.
+
+The most significant change is the increased emphasis on how this device can be used in labs beyond the first year. 
+The reviewers' comments made clear to me that I was not selling it as well as I could have: things that were obvious to me needed to be brought out in the text.
+
+We explicitly pointed out that the device can report exact position at any time during the drive cycle. 
+This capability allows for the capture of drive phase information, and we called out that phase information in figure 4.
+We suggested specifically upper-divison experiments that can be done with this device, such as using the drive-position data to generate a complete set of Poincar\'e sections for chaotic systems.
+We also suggested the possibility of using this hardware with alternate firmware to generate non-sinusoidal outputs, or multi-frequency outputs for use in Advanced Lab experiments, or using further modifications to the hardware to allow experimental feedback to the controller. 
+All these are definitely Advanced Lab applications, which should address the concerns of Reviewer 3 (and Beth) and put the article firmly into the scope of AJP.
+
+I've dug into the suggestion of Reviewer 1 that we should include something showing the improved response of a simple resonance system to this improved driver. 
+The problem I've run into is that the simple cart-spring system we've been testing it on is not particularly sensitive to the drive harmonics! 
+I did a frequency sweep from $f_o/5$ to $2f_o$, and as expected there is a cart response at $f_o/2$ where the $2f_o$ harmonic causes a slight resonance bump, but the bump is nearly buried in the noise and not particularly compelling. 
+For this system, it's not much. 
+We've been running with the apparatus, though: I currently have a  summer student building a chaotic system driven by this device, and that system would be much more sensitive to the drive harmonics.
+But we don't have that data yet; it'll be another paper entirely!
+I am hoping that we can leave that bit as is, with the mention of the measured 20dB reduction in that first overtone.
+
+I am also including a .zip file containing the SolidWorks and .STL files for the device, a schematic, and the firmware code for the microcontroller.
+
+\closing{Sincerely,}
+
+\end{letter}
+
+\end{document}
+		
+

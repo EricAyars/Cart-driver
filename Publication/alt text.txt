@@ -1,0 +1,14 @@
+Alt Text file for 
+
+Computer-Controlled Sinusoidal Drive Mechanism
+Eric Ayars and Nicholas Nelson
+
+Figure 1: Conceptual diagram of the geometry for a rotational actuator driving a linear string drive. The rotor is of radius R and at distance L from a string guide. The 'rest length' of the string (for rotor position phi=0) is given as l, and the position of the string beyond the guide is x.
+
+Figure 2: A graph comparing the linear position of the servo arm, the desired displacement of the string, and the measured displacement of the string. The servo motion is distinctly anharmonic, the desired string motion is sinusoidal, and the measured string motion overlays the desired motion almost perfectly.
+
+Figure 3: A photo of the apparatus, showing the servo motor, the string and string guide, and the control board. All these are mounted on a 3-D printed support that holds them in position on the end of a cart track.
+
+Figure 4: A dual-axis plot showing the frequency response for two carts connected by three springs. There are two clear resonance peaks for both carts. The second axis shows the phase of each cart relative to the drive signal. The carts are in phase with each other for the first peak and 180 degrees out of phase for the second peak, as expected for a coupled two-mass system. 
+
+
